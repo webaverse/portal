@@ -224,7 +224,7 @@ function Reflector( geometry, options ) {
     const portalPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(new THREE.Vector3(0, 0, 1).applyQuaternion(portalQuaternion), portalPosition);
 
     let intersection = portalPlane.intersectLine(line, new THREE.Vector3());
-    if (intersection) {
+    if (intersection && portalPlane.distanceToPoint(lastPosition) > 0 && portalPlane.distanceToPoint(currentPosition) < 0) {
       const u = new THREE.Vector3(1, 0, 0).applyQuaternion(portalQuaternion).dot(intersection.clone().sub(portalPosition));
       const v = new THREE.Vector3(0, 1, 0).applyQuaternion(portalQuaternion).dot(intersection.clone().sub(portalPosition));
 
@@ -244,7 +244,11 @@ function Reflector( geometry, options ) {
           .premultiply(portal2Quaternion);
         currentPosition.copy(camera.position)
           .add(new THREE.Vector3(0, 0, -camera.near).applyQuaternion(camera.quaternion));
+      } else {
+        intersection = null;
       }
+    } else {
+      intersection = null;
     }
 
     return !!intersection;
