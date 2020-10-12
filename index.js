@@ -126,14 +126,15 @@ window.mirrorMesh2 = mirrorMesh2;
 
 const lastPosition = new THREE.Vector3();
 function animate() {
+  const currentPosition = camera.position.clone().add(new THREE.Vector3(0, 0, -camera.near).applyQuaternion(camera.quaternion));
   for (const reflector of [mirrorMesh, mirrorMesh2]) {
-    if (reflector.update(camera, lastPosition)) {
+    if (reflector.update(camera, currentPosition, lastPosition)) {
       orbitControls.target.copy(camera.position)
         .add(new THREE.Vector3(0, 0, -1.5).applyQuaternion(camera.quaternion));
       camera.lookAt(orbitControls.target);
       break;
     }
   }
-  lastPosition.copy(camera.position);
+  lastPosition.copy(currentPosition);
 }
 renderer.setAnimationLoop(animate);

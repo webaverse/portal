@@ -201,7 +201,7 @@ function Reflector( geometry, options ) {
 
 	};
 
-  this.update = (camera, lastPosition) => {
+  this.update = (camera, currentPosition, lastPosition) => {
     const cameraPosition = camera.position;
     const cameraQuaternion = camera.quaternion;
     const cameraScale = camera.scale;
@@ -219,7 +219,8 @@ function Reflector( geometry, options ) {
     options.matrixWorld.decompose(portal2Position, portal2Quaternion, portal2Scale);
     portal2Quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI));
     
-    const line = new THREE.Line3(lastPosition, cameraPosition);
+    const line = new THREE.Line3(lastPosition, currentPosition);
+    // console.log('got current position', currentPosition.toArray());
     const portalPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(new THREE.Vector3(0, 0, 1).applyQuaternion(portalQuaternion), portalPosition);
 
     let intersection = portalPlane.intersectLine(line, new THREE.Vector3());
@@ -231,16 +232,18 @@ function Reflector( geometry, options ) {
         // console.log('intersect', u, v, color.toArray());
         const portalPoint = portalPlane.projectPoint(cameraPosition, new THREE.Vector3());
         
-        const cameraDistance = portalPoint.distanceTo(cameraPosition);
-        cameraPosition.copy(portalPoint)
+        // const oldCameraPosition = cameraPosition.clone();
+        cameraPosition
           .sub(portalPosition)
           .applyQuaternion(portalQuaternion.clone().inverse())
           .applyQuaternion(portal2Quaternion)
           .add(portal2Position)
-          .add(new THREE.Vector3(0, 0, -cameraDistance).applyQuaternion(portal2Quaternion));
+          // .add(oldCameraPosition);
         camera.quaternion
           .premultiply(portalQuaternion.clone().inverse())
           .premultiply(portal2Quaternion);
+        currentPosition.copy(camera.position)
+          .add(new THREE.Vector3(0, 0, -camera.near).applyQuaternion(camera.quaternion));
       }
     }
 
