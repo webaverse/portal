@@ -111,7 +111,7 @@ function Reflector( geometry, options ) {
     // console.log('normal coplanar', new THREE.Vector3(0, 0, 1).applyQuaternion(portalQuaternion), portalPosition.clone(), cameraPosition.clone(), portalPoint.clone());
     virtualCamera.position.copy(portalPoint)
       .sub(portalPosition)
-      .applyQuaternion(portalQuaternion.clone().inverse())
+      .applyQuaternion(portalQuaternion.clone().invert())
       .applyQuaternion(portal2Quaternion)
       .add(portal2Position)
       .add(new THREE.Vector3(0, 0, portalPoint.distanceTo(cameraPosition)).applyQuaternion(portal2Quaternion));
@@ -235,12 +235,12 @@ function Reflector( geometry, options ) {
         // const oldCameraPosition = cameraPosition.clone();
         cameraPosition
           .sub(portalPosition)
-          .applyQuaternion(portalQuaternion.clone().inverse())
+          .applyQuaternion(portalQuaternion.clone().invert())
           .applyQuaternion(portal2Quaternion)
           .add(portal2Position)
           // .add(oldCameraPosition);
         camera.quaternion
-          .premultiply(portalQuaternion.clone().inverse())
+          .premultiply(portalQuaternion.clone().invert())
           .premultiply(portal2Quaternion);
         currentPosition.copy(camera.position)
           .add(new THREE.Vector3(0, 0, -camera.near).applyQuaternion(camera.quaternion));
