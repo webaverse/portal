@@ -121,8 +121,8 @@ app.object.add(mirrorMesh2);
 mirrorMesh.options.matrixWorld = mirrorMesh2.matrixWorld;
 mirrorMesh2.options.matrixWorld = mirrorMesh.matrixWorld;
 
-window.mirrorMesh = mirrorMesh;
-window.mirrorMesh2 = mirrorMesh2;
+// window.mirrorMesh = mirrorMesh;
+// window.mirrorMesh2 = mirrorMesh2;
 
 const lastPosition = new THREE.Vector3();
 function animate() {
