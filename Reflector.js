@@ -3,6 +3,7 @@
  */
 
 import * as THREE from 'three';
+import {app} from 'app';
 
 let rendering = false;
 const reflectors = [];
@@ -83,7 +84,7 @@ function Reflector( geometry, options ) {
     }
     rendering = true;
 
-    scene.add(cubeMesh);
+    app.object.add(cubeMesh);
     
     /* const cameraPosition = new THREE.Vector3();
     const cameraQuaternion = new THREE.Quaternion();
