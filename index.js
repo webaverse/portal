@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {Reflector} from './Reflector.js';
-import {scene, renderer, camera, orbitControls, app} from 'app';
+import {scene, renderer, camera, app} from 'app';
 // console.log('loaded app', app);
 
 const localVector = new THREE.Vector3();
@@ -129,9 +129,9 @@ function animate() {
   const currentPosition = camera.position.clone().add(new THREE.Vector3(0, 0, -camera.near).applyQuaternion(camera.quaternion));
   for (const reflector of [mirrorMesh, mirrorMesh2]) {
     if (reflector.update(camera, currentPosition, lastPosition)) {
-      orbitControls.target.copy(camera.position)
+      /* orbitControls.target.copy(camera.position)
         .add(new THREE.Vector3(0, 0, -1.5).applyQuaternion(camera.quaternion));
-      camera.lookAt(orbitControls.target);
+      camera.lookAt(orbitControls.target); */
       break;
     }
   }
