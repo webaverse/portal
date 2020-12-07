@@ -43,7 +43,7 @@ const mirrorMesh = (() => {
     matrixWorld: new THREE.Matrix4(),
   };
   const mesh = new Reflector(geometry, options);
-  mesh.position.set(0, 0, -1);
+  mesh.position.set(0, 1.5, -1);
   mesh.updateMatrixWorld();
   mesh.options = options;
   mesh.frustumCulled = false;
@@ -88,7 +88,7 @@ const mirrorMesh2 = (() => {
     matrixWorld: new THREE.Matrix4(),
   };
   const mesh = new Reflector(geometry, options);
-  mesh.position.set(0, mirrorHeight/2, -5);
+  mesh.position.set(0, 3, -5);
   mesh.rotation.order = 'YXZ';
   mesh.rotation.y = Math.PI/2;
   mesh.updateMatrixWorld();
