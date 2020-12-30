@@ -44,6 +44,7 @@ const mirrorMesh = (() => {
   };
   const mesh = new Reflector(geometry, options);
   mesh.position.set(0, 1.5, -1);
+  mesh.rotation.y = Math.PI;
   mesh.updateMatrixWorld();
   mesh.options = options;
   mesh.frustumCulled = false;
@@ -72,7 +73,7 @@ const mirrorMesh = (() => {
 })();
 app.object.add(mirrorMesh);
 const mirrorMesh2 = (() => {
-  const mirrorWidth =1;
+  const mirrorWidth = 1;
   const mirrorHeight = 1;
   const geometry = new THREE.PlaneBufferGeometry(mirrorWidth, mirrorHeight)
     // .applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0, -mirrorWidth))
@@ -90,7 +91,7 @@ const mirrorMesh2 = (() => {
   const mesh = new Reflector(geometry, options);
   mesh.position.set(0, 3, -5);
   mesh.rotation.order = 'YXZ';
-  mesh.rotation.y = Math.PI/2;
+  // mesh.rotation.y = Math.PI;
   mesh.updateMatrixWorld();
   mesh.options = options;
   mesh.frustumCulled = false;
