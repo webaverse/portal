@@ -8,6 +8,10 @@ import {app} from 'app';
 let rendering = false;
 const reflectors = [];
 
+const localVector = new THREE.Vector3();
+const localQuaternion = new THREE.Quaternion();
+const localPlane = new THREE.Plane();
+
 function Reflector( geometry, options ) {
 
 	THREE.Mesh.call( this, geometry );
@@ -70,7 +74,9 @@ function Reflector( geometry, options ) {
 
 	this.material = material;
 
-  const cubeMesh = new THREE.Mesh(new THREE.BoxBufferGeometry(0.1, 0.1, 0.1), new THREE.MeshBasicMaterial({color: color}));
+  this.enabled = true;
+
+  // const cubeMesh = new THREE.Mesh(new THREE.BoxBufferGeometry(0.1, 0.1, 0.1), new THREE.MeshBasicMaterial({color: color}));
 
 	this.onBeforeRender = function ( renderer, scene, camera ) {
     for (const reflector of reflectors) {
@@ -82,112 +88,145 @@ function Reflector( geometry, options ) {
 		if (rendering) {
       return;
     }
+
     rendering = true;
 
-    app.object.add(cubeMesh);
-    
-    /* const cameraPosition = new THREE.Vector3();
-    const cameraQuaternion = new THREE.Quaternion();
-    const cameraScale = new THREE.Vector3();
-    camera.matrixWorld.decompose(cameraPosition, cameraQuaternion, cameraScale); */
-    const cameraPosition = camera.position;
-    const cameraQuaternion = camera.quaternion;
-    const cameraScale = camera.scale;
-    
-    // console.log('pre quat', cameraPosition.clone(), color.toArray());
-    
-    const portalPosition = new THREE.Vector3();
-    const portalQuaternion = new THREE.Quaternion();
-    const portalScale = new THREE.Vector3();
-    scope.matrixWorld.decompose(portalPosition, portalQuaternion, portalScale);
-    
-    const portal2Position = new THREE.Vector3();
-    const portal2Quaternion = new THREE.Quaternion();
-    const portal2Scale = new THREE.Vector3();
-    options.matrixWorld.decompose(portal2Position, portal2Quaternion, portal2Scale);
-    portal2Quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI));
+    if (this.enabled) {
+      this.visible = false;
+      if (this.options.otherMesh) {
+        this.options.otherMesh.visible = false;
+      }
 
-    const portalPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(new THREE.Vector3(0, 0, 1).applyQuaternion(portalQuaternion), portalPosition);
-    const portalPoint = portalPlane.projectPoint(cameraPosition, new THREE.Vector3());
-    // console.log('normal coplanar', new THREE.Vector3(0, 0, 1).applyQuaternion(portalQuaternion), portalPosition.clone(), cameraPosition.clone(), portalPoint.clone());
-    virtualCamera.position.copy(portalPoint)
-      .sub(portalPosition)
-      .applyQuaternion(portalQuaternion.clone().invert())
-      .applyQuaternion(portal2Quaternion)
-      .add(portal2Position)
-      .add(new THREE.Vector3(0, 0, portalPoint.distanceTo(cameraPosition)).applyQuaternion(portal2Quaternion));
-    virtualCamera.quaternion.copy(portal2Quaternion);
-    
-    cubeMesh.position.copy(virtualCamera.position);
-    
-    
-    const portalHalfWidth = portalScale.x / 2;
-    const portalHalfHeight = portalScale.y / 2;
-    // const portalPosition = new Vector3().copy(portal.position);
-    virtualCamera.updateMatrixWorld();
-    virtualCamera.worldToLocal(portal2Position);
+      // app.object.add(cubeMesh);
+      
+      /* const cameraPosition = new THREE.Vector3();
+      const cameraQuaternion = new THREE.Quaternion();
+      const cameraScale = new THREE.Vector3();
+      camera.matrixWorld.decompose(cameraPosition, cameraQuaternion, cameraScale); */
+      const cameraPosition = camera.position;
+      const cameraQuaternion = camera.quaternion;
+      const cameraScale = camera.scale;
+      
+      // console.log('pre quat', cameraPosition.clone(), color.toArray());
+      
+      const portalPosition = new THREE.Vector3();
+      const portalQuaternion = new THREE.Quaternion();
+      const portalScale = new THREE.Vector3();
+      scope.matrixWorld.decompose(portalPosition, portalQuaternion, portalScale);
+      
+      const portal2Position = new THREE.Vector3();
+      const portal2Quaternion = new THREE.Quaternion();
+      const portal2Scale = new THREE.Vector3();
+      options.matrixWorld.decompose(portal2Position, portal2Quaternion, portal2Scale);
+      portal2Quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI));
 
-    let left   = portal2Position.x - portalHalfWidth;
-    let right  = portal2Position.x + portalHalfWidth;
-    let top    = portal2Position.y + portalHalfHeight;
-    let bottom = portal2Position.y - portalHalfHeight;
-    
-    
-    
-    
-    const {near, far} = camera;
-    const distance = portalPoint.distanceTo(cameraPosition);
-    const scale = near / distance;
-    left   *= scale;
-    right  *= scale;
-    top    *= scale;
-    bottom *= scale;
-    
-    
-    
-    
-    
-    virtualCamera.projectionMatrix.makePerspective(left, right, top, bottom, near, far);
-    
-    
-    
-    
+      const portalPlane = localPlane.setFromNormalAndCoplanarPoint(new THREE.Vector3(0, 0, 1).applyQuaternion(portalQuaternion), portalPosition);
+      if (portalPlane.normal.dot(localVector.set(0, 0, -1).applyQuaternion(portalQuaternion)) < 0) {
+        const portalPoint = portalPlane.projectPoint(cameraPosition, new THREE.Vector3());
+        // console.log('normal coplanar', new THREE.Vector3(0, 0, 1).applyQuaternion(portalQuaternion), portalPosition.clone(), cameraPosition.clone(), portalPoint.clone());
+        virtualCamera.position.copy(portalPoint)
+          .sub(portalPosition)
+          .applyQuaternion(portalQuaternion.clone().invert())
+          .applyQuaternion(portal2Quaternion)
+          .add(portal2Position)
+          .add(new THREE.Vector3(0, 0, portalPoint.distanceTo(cameraPosition)).applyQuaternion(portal2Quaternion));
+        virtualCamera.quaternion.copy(portal2Quaternion);
+        
+        // cubeMesh.position.copy(virtualCamera.position);
+        
+        
+        const portalHalfWidth = portalScale.x / 2;
+        const portalHalfHeight = portalScale.y / 2;
+        // const portalPosition = new Vector3().copy(portal.position);
+        virtualCamera.updateMatrixWorld();
+        virtualCamera.worldToLocal(portal2Position);
 
-		// Render
+        let left   = portal2Position.x - portalHalfWidth;
+        let right  = portal2Position.x + portalHalfWidth;
+        let top    = portal2Position.y + portalHalfHeight;
+        let bottom = portal2Position.y - portalHalfHeight;
+        
+        
+        
+        
+        const {near, far} = camera;
+        const distance = portalPoint.distanceTo(cameraPosition);
+        const scale = near / distance;
+        left   *= scale;
+        right  *= scale;
+        top    *= scale;
+        bottom *= scale;
+        
+        
+        
+        
+        
+        virtualCamera.projectionMatrix.makePerspective(left, right, top, bottom, near, far);
+        
+        
+        
+        
 
-    /* renderer.setRenderTarget(renderTarget);
-    renderer.clear(true, true, true);
-		renderer.render(scene, virtualCamera);
-		renderer.setRenderTarget(null); */
+    		// Render
 
-    var currentRenderTarget = renderer.getRenderTarget();
+        /* renderer.setRenderTarget(renderTarget);
+        renderer.clear(true, true, true);
+    		renderer.render(scene, virtualCamera);
+    		renderer.setRenderTarget(null); */
 
-    var currentXrEnabled = renderer.xr.enabled;
-    var currentShadowAutoUpdate = renderer.shadowMap.autoUpdate;
+        var currentRenderTarget = renderer.getRenderTarget();
 
-    renderer.xr.enabled = false; // Avoid camera modification and recursion
-    renderer.shadowMap.autoUpdate = false; // Avoid re-computing shadows
+        var currentXrEnabled = renderer.xr.enabled;
+        var currentShadowAutoUpdate = renderer.shadowMap.autoUpdate;
 
-    renderer.setRenderTarget( renderTarget );
-    renderer.clear();
-    renderer.render( scene, virtualCamera );
+        renderer.xr.enabled = false; // Avoid camera modification and recursion
+        renderer.shadowMap.autoUpdate = false; // Avoid re-computing shadows
 
-    renderer.xr.enabled = currentXrEnabled;
-    renderer.shadowMap.autoUpdate = currentShadowAutoUpdate;
+        renderer.setRenderTarget( renderTarget );
+        renderer.clear();
+        renderer.render( scene, virtualCamera );
 
-    renderer.setRenderTarget( currentRenderTarget );
+        renderer.xr.enabled = currentXrEnabled;
+        renderer.shadowMap.autoUpdate = currentShadowAutoUpdate;
 
-		// Restore viewport
+        renderer.setRenderTarget( currentRenderTarget );
 
-		var viewport = camera.viewport;
+    		// Restore viewport
 
-		if ( viewport !== undefined ) {
+    		var viewport = camera.viewport;
 
-			renderer.state.viewport( viewport );
+    		if ( viewport !== undefined ) {
 
-		}
+    			renderer.state.viewport( viewport );
+
+    		}
+      }
+    } else {
+      var currentRenderTarget = renderer.getRenderTarget();
+
+      var currentXrEnabled = renderer.xr.enabled;
+      var currentShadowAutoUpdate = renderer.shadowMap.autoUpdate;
+
+      renderer.xr.enabled = false; // Avoid camera modification and recursion
+      renderer.shadowMap.autoUpdate = false; // Avoid re-computing shadows
+
+      renderer.setRenderTarget( renderTarget );
+      renderer.clear();
+      // renderer.render( scene, virtualCamera );
+
+      renderer.xr.enabled = currentXrEnabled;
+      renderer.shadowMap.autoUpdate = currentShadowAutoUpdate;
+
+      renderer.setRenderTarget( currentRenderTarget );
+    }
 
     rendering = false;
+    if (this.enabled) {
+      this.visible = true;
+      if (this.options.otherMesh) {
+        this.options.otherMesh.visible = true;
+      }
+    }
 
 	};
 	this.onAfterRender = (renderer, scene, camera) => {

@@ -4,6 +4,7 @@ import {scene, renderer, camera, app} from 'app';
 // console.log('loaded app', app);
 
 const localVector = new THREE.Vector3();
+const localVector2 = new THREE.Vector3();
 const localMatrix = new THREE.Matrix4();
 
 /* const scene = new THREE.Scene();
@@ -86,7 +87,8 @@ const mirrorMesh2 = (() => {
     addColor: 0x300000,
     recursion: 1,
     transparent: true,
-    matrixWorld: new THREE.Matrix4(),
+    matrixWorld: null,
+    otherMesh: null,
   };
   const mesh = new Reflector(geometry, options);
   mesh.position.set(0, 3, -5);
@@ -119,7 +121,9 @@ const mirrorMesh2 = (() => {
   return mesh;
 })();
 app.object.add(mirrorMesh2);
+mirrorMesh.options.otherMesh = mirrorMesh2;
 mirrorMesh.options.matrixWorld = mirrorMesh2.matrixWorld;
+mirrorMesh2.options.otherMesh = mirrorMesh;
 mirrorMesh2.options.matrixWorld = mirrorMesh.matrixWorld;
 
 // window.mirrorMesh = mirrorMesh;
@@ -128,6 +132,21 @@ mirrorMesh2.options.matrixWorld = mirrorMesh.matrixWorld;
 const lastPosition = new THREE.Vector3();
 function animate() {
   const currentPosition = camera.position.clone().add(new THREE.Vector3(0, 0, -camera.near).applyQuaternion(camera.quaternion));
+  const sortedMirrorMeshes = [mirrorMesh, mirrorMesh2].sort((a, b) => {
+    const aDistance = a.getWorldPosition(localVector).distanceTo(currentPosition);
+    const bDistance = b.getWorldPosition(localVector).distanceTo(currentPosition);
+    return aDistance - bDistance;
+  });
+  if (sortedMirrorMeshes[0].getWorldPosition(localVector).distanceTo(currentPosition) < 3) {
+    sortedMirrorMeshes[0].enabled = true;
+    sortedMirrorMeshes[1].enabled = false;
+    // for (const reflector of [mirrorMesh, mirrorMesh2]) ;
+    // }
+  } else {
+    sortedMirrorMeshes[0].enabled = false;
+    sortedMirrorMeshes[1].enabled = false;
+  }
+
   for (const reflector of [mirrorMesh, mirrorMesh2]) {
     if (reflector.update(camera, currentPosition, lastPosition)) {
       /* orbitControls.target.copy(camera.position)
