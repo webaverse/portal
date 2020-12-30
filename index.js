@@ -36,7 +36,7 @@ const mirrorMesh = (() => {
   const options = {
     clipBias: 0.003,
     textureWidth: 1024 * window.devicePixelRatio,
-    textureHeight: 2048 * window.devicePixelRatio,
+    textureHeight: 1024 * window.devicePixelRatio,
     color: 0xFF0000,
     addColor: 0x300000,
     recursion: 1,
@@ -44,7 +44,7 @@ const mirrorMesh = (() => {
     matrixWorld: new THREE.Matrix4(),
   };
   const mesh = new Reflector(geometry, options);
-  mesh.position.set(0, 1.5, -1);
+  mesh.position.set(0, 1, -100);
   mesh.rotation.y = Math.PI;
   mesh.updateMatrixWorld();
   mesh.options = options;
@@ -82,7 +82,7 @@ const mirrorMesh2 = (() => {
   const options = {
     clipBias: 0.003,
     textureWidth: 1024 * window.devicePixelRatio,
-    textureHeight: 2048 * window.devicePixelRatio,
+    textureHeight: 1024 * window.devicePixelRatio,
     color: 0x0000FF,
     addColor: 0x300000,
     recursion: 1,
@@ -91,7 +91,7 @@ const mirrorMesh2 = (() => {
     otherMesh: null,
   };
   const mesh = new Reflector(geometry, options);
-  mesh.position.set(0, 3, -5);
+  mesh.position.set(0, 1, 0);
   mesh.rotation.order = 'YXZ';
   // mesh.rotation.y = Math.PI;
   mesh.updateMatrixWorld();
