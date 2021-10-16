@@ -61,9 +61,10 @@ export default () => {
     endPortalScale = new THREE.Vector3(1, 1, 1);
   }
   
+  const mirrorWidth = 1;
+  const mirrorHeight = 2;
+  
   const mirrorMesh = (() => {
-    const mirrorWidth = 1;
-    const mirrorHeight = 1;
     const geometry = new THREE.PlaneBufferGeometry(mirrorWidth, mirrorHeight);
     const options = {
       clipBias: 0.003,
@@ -113,8 +114,6 @@ export default () => {
   })();
   app.add(mirrorMesh);
   const mirrorMesh2 = (() => {
-    const mirrorWidth = 1;
-    const mirrorHeight = 1;
     const geometry = new THREE.PlaneBufferGeometry(mirrorWidth, mirrorHeight)
       // .applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0, -mirrorWidth))
       // .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI/2)));
