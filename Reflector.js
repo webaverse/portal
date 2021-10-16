@@ -42,7 +42,7 @@ class Reflector extends THREE.Mesh {
     var target = new THREE.Vector3();
     var q = new THREE.Vector4();
 
-    var textureMatrix = new THREE.Matrix4();
+    // var textureMatrix = new THREE.Matrix4();
     var virtualCamera = new THREE.PerspectiveCamera();
 
     var parameters = {
@@ -69,7 +69,7 @@ class Reflector extends THREE.Mesh {
 
     material.uniforms[ "tDiffuse" ].value = renderTarget.texture;
     material.uniforms[ "color" ].value = color;
-    material.uniforms[ "textureMatrix" ].value = textureMatrix;
+    // material.uniforms[ "textureMatrix" ].value = textureMatrix;
 
     this.material = material;
 
@@ -310,14 +310,14 @@ Reflector.ReflectorShader = {
       value: null
     },
 
-    'textureMatrix': {
+    /* 'textureMatrix': {
       value: null
-    }
+    } */
 
   },
 
   vertexShader: [
-    'uniform mat4 textureMatrix;',
+    //  'uniform mat4 textureMatrix;',
     'varying vec2 vUv;',
 
     'void main() {',
