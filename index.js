@@ -34,6 +34,33 @@ scene.add(directionalLight2); */
 export default () => {
   const app = useApp();
   
+  const endPortalComponent = app.getComponent('endPortal');
+  let endPortalPosition;
+  let endPortalQuaternion;
+  let endPortalScale;
+  if (endPortalComponent) {
+    if (endPortalComponent.position) {
+      endPortalPosition = new THREE.Vector3().fromArray(endPortalComponent.position);
+    }
+    if (endPortalComponent.quaternion) {
+      endPortalQuaternion = new THREE.Quaternion().fromArray(endPortalComponent.quaternion);
+    }
+    if (endPortalComponent.scale) {
+      endPortalScale = new THREE.Vector3().fromArray(endPortalComponent.scale);
+    }
+  }
+  if (!endPortalPosition) {
+    endPortalPosition = new THREE.Vector3();
+    // endPortalPosition = new THREE.Vector3(0, 0, 5);
+  }
+  if (!endPortalQuaternion) {
+    endPortalQuaternion = new THREE.Quaternion();
+    // endPortalQuaternion = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
+  }
+  if (!endPortalScale) {
+    endPortalScale = new THREE.Vector3(1, 1, 1);
+  }
+  
   const mirrorMesh = (() => {
     const mirrorWidth = 1;
     const mirrorHeight = 1;
@@ -49,8 +76,12 @@ export default () => {
       matrixWorld: new THREE.Matrix4(),
     };
     const mesh = new Reflector(geometry, options);
-    mesh.position.set(0, 1, -100);
-    mesh.rotation.y = Math.PI;
+    /* mesh.position.set(0, 1, -100);
+    mesh.rotation.order = 'YXZ';
+    mesh.rotation.y = Math.PI/2; */
+    mesh.position.copy(endPortalPosition);
+    mesh.quaternion.copy(endPortalQuaternion);
+    mesh.scale.copy(endPortalScale);
     mesh.updateMatrixWorld();
     mesh.options = options;
     mesh.frustumCulled = false;
@@ -96,10 +127,10 @@ export default () => {
       otherMesh: null,
     };
     const mesh = new Reflector(geometry, options);
-    mesh.position.set(0, 1, 0);
-    mesh.rotation.order = 'YXZ';
+    // mesh.position.set(0, 1, 0);
+    // mesh.rotation.order = 'YXZ';
     // mesh.rotation.y = Math.PI;
-    mesh.updateMatrixWorld();
+    // mesh.updateMatrixWorld();
     mesh.options = options;
     mesh.frustumCulled = false;
 
