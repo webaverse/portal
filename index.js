@@ -68,8 +68,8 @@ export default () => {
     const geometry = new THREE.PlaneBufferGeometry(mirrorWidth, mirrorHeight);
     const options = {
       clipBias: 0.003,
-      textureWidth: 1024 * window.devicePixelRatio,
-      textureHeight: 1024 * window.devicePixelRatio,
+      textureWidth: 2048 * window.devicePixelRatio,
+      textureHeight: 2048 * window.devicePixelRatio,
       color: 0xFF0000,
       addColor: 0x300000,
       recursion: 1,
@@ -119,8 +119,8 @@ export default () => {
       // .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI/2)));
     const options = {
       clipBias: 0.003,
-      textureWidth: 1024 * window.devicePixelRatio,
-      textureHeight: 1024 * window.devicePixelRatio,
+      textureWidth: 2048 * window.devicePixelRatio,
+      textureHeight: 2048 * window.devicePixelRatio,
       color: 0x0000FF,
       addColor: 0x300000,
       recursion: 1,
