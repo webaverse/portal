@@ -268,7 +268,7 @@ class Reflector extends THREE.Mesh {
         const u = new THREE.Vector3(1, 0, 0).applyQuaternion(portalQuaternion).dot(intersection.clone().sub(portalPosition));
         const v = new THREE.Vector3(0, 1, 0).applyQuaternion(portalQuaternion).dot(intersection.clone().sub(portalPosition));
 
-        if (u >= -0.5 && u < 0.5 && v >= -0.5 && v < 0.5) {
+        if (u >= -portalScale.x/2 && u < portalScale.x/2 && v >= -portalScale.y/2 && v < portalScale.y/2) {
           // console.log('intersect', u, v, color.toArray());
           const portalPoint = portalPlane.projectPoint(cameraPosition, new THREE.Vector3());
           
