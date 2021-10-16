@@ -93,7 +93,10 @@ export default () => {
         color: 0x5c6bc0,
       })
     );
-    mesh.add(borderMesh);
+    borderMesh.position.copy(mesh.position);
+    borderMesh.quaternion.copy(mesh.quaternion);
+    // borderMesh.scale.copy(mesh.scale);
+    app.add(borderMesh);
 
     /* mesh.onBeforeRender2 = () => {
       if (rig) {
@@ -141,7 +144,10 @@ export default () => {
         color: 0x5c6bc0,
       })
     );
-    mesh.add(borderMesh);
+    borderMesh.position.copy(mesh.position);
+    borderMesh.quaternion.copy(mesh.quaternion);
+    // borderMesh.scale.copy(mesh.scale);
+    app.add(borderMesh);
 
     /* mesh.onBeforeRender2 = () => {
       if (rig) {
