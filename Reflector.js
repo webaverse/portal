@@ -349,7 +349,7 @@ Reflector.ReflectorShader = {
     'void main() {',
 
     '	vec4 base = texture2D( tDiffuse, vUv );',
-    '	gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.0 );',
+    '	gl_FragColor = vec4(base.rgb, 1.0);',
 
     '}'
   ].join( '\n' )
