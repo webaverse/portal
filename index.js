@@ -65,7 +65,7 @@ export default () => {
   const mirrorHeight = 2;
   
   const mirrorMesh = (() => {
-    const geometry = new THREE.PlaneBufferGeometry(mirrorWidth, mirrorHeight);
+    const geometry = new THREE.PlaneBufferGeometry(1, 1);
     const options = {
       clipBias: 0.003,
       textureWidth: 2048 * window.devicePixelRatio,
@@ -82,7 +82,8 @@ export default () => {
     mesh.rotation.y = Math.PI/2; */
     mesh.position.copy(endPortalPosition);
     mesh.quaternion.copy(endPortalQuaternion);
-    mesh.scale.copy(endPortalScale);
+    mesh.scale.copy(endPortalScale)
+      .multiply(new THREE.Vector3(mirrorWidth, mirrorHeight, 1));
     mesh.updateMatrixWorld();
     mesh.options = options;
     mesh.frustumCulled = false;
@@ -114,7 +115,7 @@ export default () => {
   })();
   app.add(mirrorMesh);
   const mirrorMesh2 = (() => {
-    const geometry = new THREE.PlaneBufferGeometry(mirrorWidth, mirrorHeight)
+    const geometry = new THREE.PlaneBufferGeometry(1, 1)
       // .applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0, -mirrorWidth))
       // .applyMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI/2)));
     const options = {
@@ -132,7 +133,8 @@ export default () => {
     // mesh.position.set(0, 1, 0);
     // mesh.rotation.order = 'YXZ';
     // mesh.rotation.y = Math.PI;
-    // mesh.updateMatrixWorld();
+    mesh.scale.set(mirrorWidth, mirrorHeight, 1);
+    mesh.updateMatrixWorld();
     mesh.options = options;
     mesh.frustumCulled = false;
 
