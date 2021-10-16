@@ -148,13 +148,14 @@ class Reflector extends THREE.Mesh {
           
           
           
-          const {near, far} = camera;
+          const {far} = camera;
           const distance = portalPoint.distanceTo(cameraPosition);
-          const scale = near / distance;
+          const near = distance;
+          /* const scale = near / distance;
           left   *= scale;
           right  *= scale;
           top    *= scale;
-          bottom *= scale;
+          bottom *= scale; */
           
           
           
