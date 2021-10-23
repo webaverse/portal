@@ -49,7 +49,8 @@ class Reflector extends THREE.Mesh {
       minFilter: THREE.LinearFilter,
       magFilter: THREE.LinearFilter,
       format: THREE.RGBFormat,
-      stencilBuffer: false
+      encoding: THREE.sRGBEncoding,
+      stencilBuffer: false,
     };
 
     var renderTarget = new THREE.WebGLRenderTarget( textureWidth, textureHeight, parameters );
