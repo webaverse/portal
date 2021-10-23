@@ -50,12 +50,12 @@ export default () => {
     }
   }
   if (!endPortalPosition) {
-    endPortalPosition = new THREE.Vector3();
-    // endPortalPosition = new THREE.Vector3(0, 0, 5);
+    // endPortalPosition = new THREE.Vector3();
+    endPortalPosition = new THREE.Vector3(0, 0, 5);
   }
   if (!endPortalQuaternion) {
-    endPortalQuaternion = new THREE.Quaternion();
-    // endPortalQuaternion = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
+    // endPortalQuaternion = new THREE.Quaternion();
+    endPortalQuaternion = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
   }
   if (!endPortalScale) {
     endPortalScale = new THREE.Vector3(1, 1, 1);
