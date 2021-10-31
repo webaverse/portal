@@ -168,6 +168,7 @@ class Reflector extends THREE.Mesh {
           
           
           virtualCamera.projectionMatrix.makePerspective(left, right, top, bottom, near, far);
+          virtualCamera.projectionMatrixInverse.copy(virtualCamera.projectionMatrix).invert();
           
           
           
