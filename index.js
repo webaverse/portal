@@ -6,8 +6,8 @@ const {useApp, useFrame, useInternals} = metaversefile;
 // console.log('loaded app', app);
 
 const localVector = new THREE.Vector3();
-const localVector2 = new THREE.Vector3();
-const localMatrix = new THREE.Matrix4();
+// const localVector2 = new THREE.Vector3();
+// const localMatrix = new THREE.Matrix4();
 
 /* const scene = new THREE.Scene();
 // scene.background = new THREE.Color(0xEEEEEE);
