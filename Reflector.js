@@ -83,11 +83,11 @@ class Reflector extends THREE.Mesh {
     this.onBeforeRender = function ( renderer, scene, camera ) {
       useBeforeRender();
       
-      for (const reflector of reflectors) {
+      /* for (const reflector of reflectors) {
         if (reflector !== this) {
           reflector.visible = false;
         }
-      }
+      } */
       
       if (rendering) {
         useAfterRender();
@@ -97,10 +97,10 @@ class Reflector extends THREE.Mesh {
       rendering = true;
 
       if (this.enabled) {
-        this.visible = false;
+        /* this.visible = false;
         if (this.options.otherMesh) {
           this.options.otherMesh.visible = false;
-        }
+        } */
 
         // app.object.add(cubeMesh);
         
@@ -227,20 +227,20 @@ class Reflector extends THREE.Mesh {
       }
 
       rendering = false;
-      if (this.enabled) {
+      /* if (this.enabled) {
         this.visible = true;
         if (this.options.otherMesh) {
           this.options.otherMesh.visible = true;
         }
-      }
+      } */
       
       useAfterRender();
     };
-    this.onAfterRender = (renderer, scene, camera) => {
+    /* this.onAfterRender = (renderer, scene, camera) => {
       for (const reflector of reflectors) {
         reflector.visible = true;
       }
-    };
+    }; */
 
     this.getRenderTarget = function () {
 
