@@ -3,6 +3,8 @@
  */
 
 import * as THREE from 'three';
+import metaversefile from 'metaversefile';
+const {useBeforeRender, useAfterRender} = metaversefile;
 
 let rendering = false;
 const reflectors = [];
@@ -79,6 +81,8 @@ class Reflector extends THREE.Mesh {
     // const cubeMesh = new THREE.Mesh(new THREE.BoxBufferGeometry(0.1, 0.1, 0.1), new THREE.MeshBasicMaterial({color: color}));
 
     this.onBeforeRender = function ( renderer, scene, camera ) {
+      useBeforeRender();
+      
       for (const reflector of reflectors) {
         if (reflector !== this) {
           reflector.visible = false;
@@ -228,7 +232,8 @@ class Reflector extends THREE.Mesh {
           this.options.otherMesh.visible = true;
         }
       }
-
+      
+      useAfterRender();
     };
     this.onAfterRender = (renderer, scene, camera) => {
       for (const reflector of reflectors) {
