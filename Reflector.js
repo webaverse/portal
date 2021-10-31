@@ -49,7 +49,7 @@ class Reflector extends THREE.Mesh {
       // minFilter: THREE.LinearFilter,
       // magFilter: THREE.LinearFilter,
       format: THREE.RGBFormat,
-      encoding: THREE.sRGBEncoding,
+      // encoding: THREE.sRGBEncoding,
       stencilBuffer: false,
     };
 
