@@ -90,6 +90,7 @@ class Reflector extends THREE.Mesh {
       }
       
       if (rendering) {
+        useAfterRender();
         return;
       }
 
