@@ -4,14 +4,18 @@
 
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useBeforeRender, useAfterRender} = metaversefile;
+const {useInternals, useBeforeRender, useAfterRender} = metaversefile;
 
 let rendering = false;
 const reflectors = [];
 
 const localVector = new THREE.Vector3();
+const localVector2 = new THREE.Vector3();
 const localQuaternion = new THREE.Quaternion();
 const localPlane = new THREE.Plane();
+const localMatrix = new THREE.Matrix4();
+
+const {camera} = useInternals();
 
 class Reflector extends THREE.Mesh {
   constructor( geometry, options ) {
@@ -50,18 +54,36 @@ class Reflector extends THREE.Mesh {
     var parameters = {
       // minFilter: THREE.LinearFilter,
       // magFilter: THREE.LinearFilter,
-      format: THREE.RGBFormat,
+      format: THREE.RGBAFormat,
       // encoding: THREE.sRGBEncoding,
-      stencilBuffer: false,
+      // stencilBuffer: false,
     };
 
-    var renderTarget = new THREE.WebGLRenderTarget( textureWidth, textureHeight, parameters );
+    const _makeRenderTarget = () => {
+      var renderTarget = new THREE.WebGLRenderTarget( textureWidth, textureHeight, parameters );
 
-    if ( ! THREE.Math.isPowerOfTwo( textureWidth ) || ! THREE.Math.isPowerOfTwo( textureHeight ) ) {
+      if ( ! THREE.Math.isPowerOfTwo( textureWidth ) || ! THREE.Math.isPowerOfTwo( textureHeight ) ) {
 
-      renderTarget.texture.generateMipmaps = false;
+        renderTarget.texture.generateMipmaps = false;
 
-    }
+      }
+      
+      return renderTarget;
+    };
+    const renderTargets = [
+      _makeRenderTarget(),
+      _makeRenderTarget(),
+      _makeRenderTarget(),
+      _makeRenderTarget(),
+    ];
+    let renderTargetIndex = 0;
+    const getReadRenderTarget = () => renderTargets[renderTargetIndex];
+    const getWriteRenderTarget = () => renderTargets[(renderTargetIndex + 1) % 4];
+    const getOldRenderTarget = () => renderTargets[(renderTargetIndex + 2) % 4];
+    const getVeryOldRenderTarget = () => renderTargets[(renderTargetIndex + 3) % 4];
+    const _swapRenderTargets = () => {
+      renderTargetIndex = (renderTargetIndex + 1) % 4;
+    };
 
     var material = new THREE.ShaderMaterial( {
       uniforms: THREE.UniformsUtils.clone( shader.uniforms ),
@@ -70,7 +92,7 @@ class Reflector extends THREE.Mesh {
       transparent: options.transparent,
     } );
 
-    material.uniforms[ "tDiffuse" ].value = renderTarget.texture;
+    material.uniforms[ "tDiffuse" ].value = getReadRenderTarget().texture;
     material.uniforms[ "color" ].value = color;
     // material.uniforms[ "textureMatrix" ].value = textureMatrix;
 
@@ -80,8 +102,20 @@ class Reflector extends THREE.Mesh {
 
     // const cubeMesh = new THREE.Mesh(new THREE.BoxBufferGeometry(0.1, 0.1, 0.1), new THREE.MeshBasicMaterial({color: color}));
 
+    let uniformsNeedUpdate = material.uniformsNeedUpdate;
+    let forceUniformsNeedUpdate = false;
+    Object.defineProperty(material, 'uniformsNeedUpdate', {
+      get() {
+        return forceUniformsNeedUpdate || uniformsNeedUpdate;
+      },
+      set(v) {
+        uniformsNeedUpdate = v;
+      },
+    });
+
+    const globalCamera = camera;
     this.onBeforeRender = function ( renderer, scene, camera ) {
-      useBeforeRender();
+      forceUniformsNeedUpdate = true;
       
       /* for (const reflector of reflectors) {
         if (reflector !== this) {
@@ -89,12 +123,41 @@ class Reflector extends THREE.Mesh {
         }
       } */
       
+      material.uniforms[ "tDiffuse" ].value = getOldRenderTarget().texture;
+      
       if (rendering) {
-        useAfterRender();
+        material.uniforms[ "textureMatrix" ].value
+          .copy(
+            localMatrix.copy(camera.projectionMatrix)
+            // localMatrix.identity()
+          )
+          .premultiply(
+            localMatrix.compose(
+              this.getWorldPosition(localVector),
+              this.getWorldQuaternion(localQuaternion),
+              localVector2.set(1, 1, 1)
+            )
+          )
+          .premultiply(
+            localMatrix.copy(camera.matrixWorld).invert()
+          )
+          /* .premultiply(
+            localMatrix.copy(camera.projectionMatrix).invert()
+          ) */
+          .premultiply(
+            localMatrix.copy(camera.projectionMatrix).invert()
+          )
+          
+        
         return;
+      } else {
+        material.uniforms[ "textureMatrix" ].value.identity();
       }
+      
 
       rendering = true;
+      
+      useBeforeRender();
 
       if (this.enabled) {
         /* this.visible = false;
@@ -124,6 +187,8 @@ class Reflector extends THREE.Mesh {
         const portal2Scale = new THREE.Vector3();
         options.matrixWorld.decompose(portal2Position, portal2Quaternion, portal2Scale);
         portal2Quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI));
+
+        const oldWriteRt = getWriteRenderTarget();
 
         const portalPlane = localPlane.setFromNormalAndCoplanarPoint(new THREE.Vector3(0, 0, 1).applyQuaternion(portalQuaternion), portalPosition);
         if (portalPlane.normal.dot(localVector.set(0, 0, -1).applyQuaternion(portalQuaternion)) < 0) {
@@ -189,7 +254,7 @@ class Reflector extends THREE.Mesh {
           renderer.xr.enabled = false; // Avoid camera modification and recursion
           renderer.shadowMap.autoUpdate = false; // Avoid re-computing shadows
 
-          renderer.setRenderTarget( renderTarget );
+          renderer.setRenderTarget( getWriteRenderTarget() );
           renderer.clear();
           renderer.render( scene, virtualCamera );
 
@@ -208,8 +273,15 @@ class Reflector extends THREE.Mesh {
 
           }
         }
+        
+        _swapRenderTargets();
+        /* if (getReadRenderTarget() !== oldWriteRt) {
+          debugger;
+        } */
+        material.uniforms[ "tDiffuse" ].value = getReadRenderTarget().texture;
       } else {
-        var currentRenderTarget = renderer.getRenderTarget();
+        material.uniforms[ "tDiffuse" ].value = getOldRenderTarget().texture;
+        /* var currentRenderTarget = renderer.getRenderTarget();
 
         var currentXrEnabled = renderer.xr.enabled;
         var currentShadowAutoUpdate = renderer.shadowMap.autoUpdate;
@@ -217,15 +289,17 @@ class Reflector extends THREE.Mesh {
         renderer.xr.enabled = false; // Avoid camera modification and recursion
         renderer.shadowMap.autoUpdate = false; // Avoid re-computing shadows
 
-        renderer.setRenderTarget( renderTarget );
+        renderer.setRenderTarget( getWriteRenderTarget() );
         renderer.clear();
         // renderer.render( scene, virtualCamera );
 
         renderer.xr.enabled = currentXrEnabled;
         renderer.shadowMap.autoUpdate = currentShadowAutoUpdate;
 
-        renderer.setRenderTarget( currentRenderTarget );
+        renderer.setRenderTarget( currentRenderTarget ); */
       }
+      
+      material.uniforms[ "textureMatrix" ].value.identity();
 
       rendering = false;
       /* if (this.enabled) {
@@ -237,17 +311,15 @@ class Reflector extends THREE.Mesh {
       
       useAfterRender();
     };
-    /* this.onAfterRender = (renderer, scene, camera) => {
-      for (const reflector of reflectors) {
-        reflector.visible = true;
-      }
-    }; */
+    this.onAfterRender = (renderer, scene, camera) => {
+      forceUniformsNeedUpdate = false;
+    };
 
-    this.getRenderTarget = function () {
+    /* this.getRenderTarget = function () {
 
       return renderTarget;
 
-    };
+    }; */
 
     this.update = (camera, currentPosition, lastPosition) => {
       const cameraPosition = camera.position;
@@ -317,20 +389,35 @@ Reflector.ReflectorShader = {
     'tDiffuse': {
       value: null
     },
-
-    /* 'textureMatrix': {
-      value: null
-    } */
+    
+    'textureMatrix': {
+      value: new THREE.Matrix4(),
+    }
 
   },
 
   vertexShader: [
     //  'uniform mat4 textureMatrix;',
     'varying vec2 vUv;',
+    'uniform mat4 textureMatrix;',
+
+    'const mat4 identityMatrix = mat4(1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1.);',
 
     'void main() {',
 
-    '	vUv = uv;',
+    `
+      if (textureMatrix == identityMatrix) {
+        vUv = uv;
+      } else {
+        // vec4 uvPosition = vec4((uv.x - 0.5) * 2., (uv.y - 0.5) * 2., 0., 1.);
+        vec4 uvPosition = vec4(uv.x, uv.y, 0., 1.);
+        uvPosition = textureMatrix * uvPosition;
+        uvPosition /= uvPosition.w;
+        // vUv = (uvPosition.xy / 2.) + 0.5;
+        vUv = uvPosition.xy;
+        // vUv.y *= 0.5;
+      }
+    `,
 
     '	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
 
@@ -340,6 +427,7 @@ Reflector.ReflectorShader = {
   fragmentShader: [
     'uniform vec3 color;',
     'uniform sampler2D tDiffuse;',
+    'uniform mat4 textureMatrix;',
     'varying vec2 vUv;',
 
     'float blendOverlay( float base, float blend ) {',
@@ -356,8 +444,7 @@ Reflector.ReflectorShader = {
 
     'void main() {',
 
-    '	vec4 base = texture2D( tDiffuse, vUv );',
-    '	gl_FragColor = vec4(base.rgb, 1.0);',
+    '	gl_FragColor = texture2D( tDiffuse, vUv );',
 
     '}'
   ].join( '\n' )

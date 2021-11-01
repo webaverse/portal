@@ -6,7 +6,7 @@ const {useApp, useFrame, useInternals} = metaversefile;
 // console.log('loaded app', app);
 
 const localVector = new THREE.Vector3();
-// const localVector2 = new THREE.Vector3();
+const localVector2 = new THREE.Vector3();
 // const localMatrix = new THREE.Matrix4();
 
 /* const scene = new THREE.Scene();
@@ -173,16 +173,25 @@ export default () => {
   // window.mirrorMesh = mirrorMesh;
   // window.mirrorMesh2 = mirrorMesh2;
 
+  const maxDistance = 10;
   const lastPosition = new THREE.Vector3();
   useFrame(() => {
     const {camera} = useInternals();
     const currentPosition = camera.position.clone().add(new THREE.Vector3(0, 0, -camera.near).applyQuaternion(camera.quaternion));
     const sortedMirrorMeshes = [mirrorMesh, mirrorMesh2].sort((a, b) => {
-      const aDistance = a.getWorldPosition(localVector).distanceTo(currentPosition);
-      const bDistance = b.getWorldPosition(localVector).distanceTo(currentPosition);
-      return aDistance - bDistance;
+      const cameraVector = localVector.set(0, 0, -1).applyQuaternion(camera.quaternion);
+      const angleA = a.getWorldDirection(localVector2).angleTo(cameraVector);
+      const angleB = b.getWorldDirection(localVector2).angleTo(cameraVector);
+      const angleDiff = angleB - angleA;
+      if (angleDiff !== 0) {
+        return angleDiff;
+      } else {
+        const aDistance = a.getWorldPosition(localVector2).distanceTo(currentPosition);
+        const bDistance = b.getWorldPosition(localVector2).distanceTo(currentPosition);
+        return aDistance - bDistance;
+      }
     });
-    if (sortedMirrorMeshes[0].getWorldPosition(localVector).distanceTo(currentPosition) < 3) {
+    if (sortedMirrorMeshes[0].getWorldPosition(localVector).distanceTo(currentPosition) < maxDistance) {
       sortedMirrorMeshes[0].enabled = true;
       sortedMirrorMeshes[1].enabled = false;
       // for (const reflector of [mirrorMesh, mirrorMesh2]) ;
