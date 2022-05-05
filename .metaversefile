@@ -1,4 +1,5 @@
 {
   "name": "portal",
+  "description": "portal",
   "start_url": "index.js"
 }
